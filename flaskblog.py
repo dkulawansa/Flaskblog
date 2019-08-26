@@ -1,8 +1,9 @@
-#hello_world.py
+import logging
 from datetime import datetime
 from flask import Flask, render_template, url_for, flash, redirect
 from forms import RegistrationForm, LoginForm
 from flask_sqlalchemy import SQLAlchemy
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '5eff0e854b7a55a95084e52fa4a1ae43'
@@ -49,7 +50,18 @@ def login():
 			return redirect(url_for('home'))
 	return render_template('login.html', title='Login', form=form)
 
+@app.errorhandler(500)
+def server_error(e):
+    logging.exception('An error occurred during a request.')
+    return """
+    An internal error occurred: <pre>{}</pre>
+    See logs for full stacktrace.
+    """.format(e), 500
+
 
 
 if __name__ == "__main__":
+	# This is used when running locally. Gunicorn is used to run the
+	# application on Google App Engine. See entrypoint in app.yaml.
 	app.run(host='127.0.0.1', port=8080, debug=True)
+
